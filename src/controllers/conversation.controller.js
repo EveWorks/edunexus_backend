@@ -2,9 +2,10 @@ const httpStatus = require('http-status');
 const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
-const { conversationService, me } = require('../services');
+const { conversationService } = require('../services');
 const { User, Message } = require('../models');
 const callAIService = require('../services/ai.service');
+const { Conversation } = require('../models')
 
 
 const sendmessage = catchAsync(async (req, res) => {
@@ -107,7 +108,8 @@ const createConversation = catchAsync(async (req, res) => {
     userid: params?.userid
   }
 
-  const data = await conversationService.createConversation(conversation_obj)
+  let data = await conversationService.createConversation(conversation_obj)
+  data = await Conversation.findById(data?._id).populate('topicid')
   if (!data) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Error in creating conversation.');
   }
