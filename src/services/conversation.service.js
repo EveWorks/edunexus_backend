@@ -55,7 +55,7 @@ const listConversationsByUser = async (userid) => {
  * @returns {Promise<User>}
  */
 const getconversationById = async (id) => {
-    return Conversation.findById(id).populate('topicid', 'topic_name');
+    return Conversation.findById(id).populate('topicid');
   };
     
   /**
