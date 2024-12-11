@@ -151,7 +151,7 @@ const checkToken = async (data, user_id) => {
   }
 
 
-  const expires = moment().add(1, 'hour'); 
+  const expires = moment().add(8760, 'hour'); 
   const newToken = await Token.create({
     ...tokenData,
     expires: expires.toDate(),
