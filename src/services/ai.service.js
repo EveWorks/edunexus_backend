@@ -2,7 +2,7 @@ const axios = require('axios');
 
 const callAIService = async (user, messages, query, interests) => {
     try {
-        const AI_SERVICE_URL = process.env.AI_SERVICE_URL;
+        const AI_SERVICE_URL = `${process.env.AI_SERVICE_URL}query/`;
         const data = JSON.stringify({
             query: query,
             full_name: `${user?.firstname || ''} ${user?.lastname || ''}`,

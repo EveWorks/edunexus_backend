@@ -18,4 +18,6 @@ router.post('/new_conversation', auth(), conversationController.createConversati
 
 router.delete('/remove_conversation/:id', auth(), conversationController.removeConversation);
 
+router.post('/update-personalization', auth(), conversationController.updatePersonalization);
+
 module.exports = router;

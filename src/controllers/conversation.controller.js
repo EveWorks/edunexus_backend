@@ -3,9 +3,10 @@ const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { conversationService } = require('../services');
-const { User, Message } = require('../models');
+const { User, Message, Personalization } = require('../models');
 const callAIService = require('../services/ai.service');
 const { Conversation } = require('../models')
+const axios = require('axios');
 
 
 const sendmessage = catchAsync(async (req, res) => {
@@ -29,36 +30,51 @@ const sendmessage = catchAsync(async (req, res) => {
     }).select({role: 1, "content": "$message", _id: 0, "type": "$message_type"}).lean()
 
     let aiResponse = await callAIService(userData, conversationMessages, message, interests)
+    if (aiResponse.messagesArray.length) {
+      for (let index = 0; index < aiResponse.messagesArray.length; index++) {
+        const element = aiResponse.messagesArray[index];
+        await conversationService.createMessage({
+          message: element?.content,
+          message_type: element?.type,
+          conversationid: conversation?._id,
+          userid,
+          role: element.role
+        })
+      }
+    }
 
-    const newMessage = await conversationService.createMessage({
-        message,
-        message_type: message_type,
-        conversationid: conversation._id,
-        userid,
-        role: "user"
-    });
+    // const newMessage = await conversationService.createMessage({
+    //     message,
+    //     message_type: message_type,
+    //     conversationid: conversation._id,
+    //     userid,
+    //     role: "user"
+    // });
 
     const aiMessage = aiResponse;  
 
-    const newAiMessage = await conversationService.createMessage({
-        message: aiMessage?.messageObject?.content,
-        message_type: aiMessage?.messageObject.type, 
-        conversationid: conversation._id,
-        userid,
-        role: "assistant"
-    });
+    // const newAiMessage = await conversationService.createMessage({
+    //     message: aiMessage?.messageObject?.content,
+    //     message_type: aiMessage?.messageObject.type, 
+    //     conversationid: conversation._id,
+    //     userid,
+    //     role: "assistant"
+    // });
 
     const allMessages = await Message.find({
       userid: userid,
       conversationid: conversation?._id
-    }).lean()
+    })
+    .sort({createdAt: 1})
+    .lean()
 
     res.status(httpStatus.CREATED).send({
         // conversation: conversation,
         // message: newMessage,
         // AiResponse:newAiMessage,
         // messages: allMessages,
-        aiResponse 
+        aiResponse,
+        allMessages: allMessages
     });
 });
 
@@ -131,11 +147,77 @@ const removeConversation = catchAsync(async (req, res) => {
   });
 })
 
+const updatePersonalization = catchAsync(async (req, res) => {
+  const params = req?.body;
+  if (!params?.conversationId && !params?.userId) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Invalid JSON');
+  }
+  try {
+    const AI_SERVICE_URL = process.env.AI_SERVICE_URL;
+    const conversationMessage = await Message.find({
+      conversationid: params?.conversationId,
+      userid: params?.userId
+    })
+    const userData = await User.findById(params?.userId)
+    const personalization = await Personalization.findOne({
+      conversationId: params?.conversationId,
+      userId: params?.userId
+    })
+    const options = JSON.stringify({
+      "query": "",
+      "full_name": `${userData?.firstname || ''} ${userData?.lastname || ''}`,
+      "major": `${userData?.major || ''}`,
+      "degree": userData?.degree,
+      "school": userData?.university,
+      "year": userData?.year ? String(userData?.year) : '',
+      "interests": personalization?.interests?.length ? personalization?.interests : ["Computer Science", "Mathematics"],
+      "wants_to_learn": personalization?.wants_to_learn?.length ? personalization?.wants_to_learn : ["Computer Science", "Mathematics"],
+      "previous_progress": personalization?.previous_progress?.length ? personalization?.previous_progress : {},
+      "messages": conversationMessage.map(e => e.message).length > 0 ? conversationMessage.map(e => e.message) : []
+    }) 
+    let config = {
+      method: 'POST',
+      maxBodyLength: Infinity,
+      url: `${AI_SERVICE_URL}personalize-using-session/`,
+      headers: {
+        'accept': 'application/json', 
+        'Content-Type': 'application/json'
+      },
+      data: options
+    };
+    const response = await axios.request(config);
+    if (!personalization) {
+      await Personalization.create({
+        userId: userData?._id,
+        conversationId: params?.conversationId,
+        interests: response?.data?.interests,
+        wants_to_learn: response?.data?.wants_to_learn,
+        previous_progress: response?.data?.previous_progress
+      })
+    } else {
+      await Personalization.findByIdAndUpdate({
+        _id: personalization?._id
+      }, {
+        interests: response?.data?.interests,
+        wants_to_learn: response?.data?.wants_to_learn,
+        previous_progress: response?.data?.previous_progress
+      }, {new: true})
+    }
+    res.status(200).send({
+      message: "Operation executed successfully.",
+      status: true
+    });
+  } catch (error) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.toString());
+  }
+})
+
 module.exports = {
     sendmessage,
     list_conversation,
     get_conversation,
     get_allmessage,
     removeConversation,
-    createConversation
+    createConversation,
+    updatePersonalization
 };

@@ -31,6 +31,10 @@ const userSchema = mongoose.Schema(
       required: true,
       trim: true,
     },
+    major: {
+      type: String,
+      default: '',
+    },
     degree: {
       type: String,
       required: true,
@@ -38,7 +42,7 @@ const userSchema = mongoose.Schema(
     },
     country: {
       type: String,
-      default: ''
+      default: '',
     },
     year: {
       type: Number,
