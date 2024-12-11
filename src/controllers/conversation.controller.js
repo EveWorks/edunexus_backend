@@ -54,10 +54,11 @@ const sendmessage = catchAsync(async (req, res) => {
     }).lean()
 
     res.status(httpStatus.CREATED).send({
-        conversation: conversation,
-        message: newMessage,
-        AiResponse:newAiMessage,
-        messages: allMessages
+        // conversation: conversation,
+        // message: newMessage,
+        // AiResponse:newAiMessage,
+        // messages: allMessages,
+        aiResponse 
     });
 });
 
