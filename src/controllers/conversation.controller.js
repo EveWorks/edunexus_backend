@@ -50,7 +50,7 @@ const sendmessage = catchAsync(async (req, res) => {
     //     userid,
     //     role: "user"
     // });
-
+    aiResponse = aiResponse?.messagesArray?.filter(m => m.type !== 'message-summary')
     const aiMessage = aiResponse;  
 
     // const newAiMessage = await conversationService.createMessage({
@@ -63,7 +63,10 @@ const sendmessage = catchAsync(async (req, res) => {
 
     const allMessages = await Message.find({
       userid: userid,
-      conversationid: conversation?._id
+      conversationid: conversation?._id,
+      message_type: {
+        $nin: ['message-summary']
+      }
     })
     .sort({createdAt: 1})
     .lean()
