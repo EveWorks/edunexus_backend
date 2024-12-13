@@ -157,6 +157,8 @@ const updatePersonalization = catchAsync(async (req, res) => {
       conversationid: params?.conversationId,
       userid: params?.userId
     })
+    .sort({_id: -1})
+    .limit(5)
     const userData = await User.findById(params?.userId)
     const personalization = await Personalization.findOne({
       conversationId: params?.conversationId,
