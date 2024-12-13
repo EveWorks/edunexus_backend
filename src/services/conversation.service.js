@@ -45,7 +45,7 @@ const createConversation = async (conversationBody) => {
 const listConversationsByUser = async (userid) => {
   return Conversation.find({ userid })
     .populate('topicid', 'topic_name') // Populate topic_name from the Topic model
-    .sort({ createdAt: -1 }); // Sort by most recent conversation
+    .sort({ createdAt: 1 }); // Sort by most recent conversation
 };
 
 
@@ -80,7 +80,7 @@ const getconversationById = async (id) => {
       .limit(limit)
       .populate('conversationid', 'topicid') 
       .populate('userid', 'firstname lastname') 
-      .sort({ createdAt: -1 }); 
+      .sort({ createdAt: 1 }); 
 
     const totalPages = Math.ceil(total / limit);
 
