@@ -28,7 +28,7 @@ const sendmessage = catchAsync(async (req, res) => {
       userid: userid,
       conversationid: conversation?._id
     }).select({role: 1, "content": "$message", _id: 0, "type": "$message_type"})
-    .limit(5).lean()
+    .limit(15).lean()
 
     let aiResponse = await callAIService(userData, conversationMessages, message, interests)
     if (aiResponse.messagesArray.length) {
