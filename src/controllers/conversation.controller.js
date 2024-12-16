@@ -24,11 +24,12 @@ const sendmessage = catchAsync(async (req, res) => {
             userid,
         });
     }
-    const conversationMessages = await Message.find({
+    let conversationMessages = await Message.find({
       userid: userid,
       conversationid: conversation?._id
     }).select({role: 1, "content": "$message", _id: 0, "type": "$message_type"})
-    .limit(15).lean()
+    .limit(15).sort({_id: -1}).lean()
+    conversationMessages = conversationMessages.reverse()
 
     let aiResponse = await callAIService(userData, conversationMessages, message, interests)
     if (aiResponse.messagesArray.length) {
