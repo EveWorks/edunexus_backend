@@ -1,4 +1,5 @@
 const httpStatus = require('http-status');
+const axios = require('axios');
 const tokenService = require('./token.service');
 const userService = require('./user.service');
 const Token = require('../models/token.model');
@@ -90,10 +91,26 @@ const verifyEmail = async (verifyEmailToken) => {
   }
 };
 
+const getUniversityList = async () => {
+  try {
+    const config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      url: 'http://universities.hipolabs.com/search',
+    };
+
+    const response = await axios.request(config);
+    return response.data;
+  } catch (error) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Something went wrong.');
+  }
+};
+
 module.exports = {
   loginUserWithEmailAndPassword,
   logout,
   refreshAuth,
   resetPassword,
   verifyEmail,
+  getUniversityList,
 };
