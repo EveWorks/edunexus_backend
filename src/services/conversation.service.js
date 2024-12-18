@@ -1,9 +1,6 @@
 const httpStatus = require('http-status');
-const { Conversation,Message } = require('../models');
+const { Conversation, Message } = require('../models');
 const ApiError = require('../utils/ApiError');
-
-
-
 
 /**
  * Create a new conversation
@@ -11,10 +8,9 @@ const ApiError = require('../utils/ApiError');
  * @returns {Promise<Conversation>}
  */
 const createConversation = async (conversationBody) => {
-    return Conversation.create(conversationBody);
-  };
-  
-  
+  return Conversation.create(conversationBody);
+};
+
 /**
  * Get all conversations for a specific user
  * @param {string} userid - The ID of the user
@@ -22,20 +18,20 @@ const createConversation = async (conversationBody) => {
  * @returns {Promise<Array>} - List of conversations
  */
 
-  const getConversationByTopicAndUser = async (topicid, userid) => {
-    return await Conversation.findOne({ topicid, userid });
+const getConversationByTopicAndUser = async (topicid, userid) => {
+  return await Conversation.findOne({ topicid, userid });
 };
 
+/**
+ * Create a new message for a conversation
+ * @param {Object} messageBody
+ * @returns {Promise<Message>}
+ */
 
-  /**
-   * Create a new message for a conversation
-   * @param {Object} messageBody
-   * @returns {Promise<Message>}
-   */
-
-  const createMessage = async (messageBody) => {
-    return Message.create(messageBody);
-  };
+const createMessage = async (messageBody) => {
+  // eslint-disable-next-line no-return-await
+  return await Message.create(messageBody);
+};
 
 /**
  * Get all conversations for a specific user
@@ -48,52 +44,51 @@ const listConversationsByUser = async (userid) => {
     .sort({ createdAt: 1 }); // Sort by most recent conversation
 };
 
-
 /**
  * Get user by id
  * @param {ObjectId} id
  * @returns {Promise<User>}
  */
 const getconversationById = async (id) => {
-    return Conversation.findById(id).populate('topicid');
+  return Conversation.findById(id).populate('topicid');
+};
+
+/**
+ * Get all messages by conversation ID with pagination
+ * @param {string} conversation_id - The ID of the conversation
+ * @param {Object} options - Pagination options
+ * @param {number} [options.limit] - Maximum number of results per page (default = 10)
+ * @param {number} [options.page] - Current page (default = 1)
+ * @returns {Promise<Object>} - Paginated messages with metadata
+ */
+const getAllMessages = async (conversation_id, options) => {
+  const { page = 1, limit = 10 } = options;
+
+  const skip = (page - 1) * limit;
+
+  const filter = { conversationid: conversation_id };
+
+  const total = await Message.countDocuments(filter);
+
+  const messages = await Message.find(filter)
+    .skip(skip)
+    .limit(limit)
+    .populate('conversationid', 'topicid')
+    .populate('userid', 'firstname lastname')
+    .sort({ createdAt: 1 });
+
+  const totalPages = Math.ceil(total / limit);
+
+  return {
+    data: messages,
+    pagination: {
+      totalItems: total,
+      totalPages,
+      currentPage: page,
+      limit,
+    },
   };
-    
-  /**
-   * Get all messages by conversation ID with pagination
-   * @param {string} conversation_id - The ID of the conversation
-   * @param {Object} options - Pagination options
-   * @param {number} [options.limit] - Maximum number of results per page (default = 10)
-   * @param {number} [options.page] - Current page (default = 1)
-   * @returns {Promise<Object>} - Paginated messages with metadata
-   */
-  const getAllMessages = async (conversation_id, options) => {
-    const { page = 1, limit = 10 } = options;
-
-    const skip = (page - 1) * limit;
-
-    const filter = { conversationid: conversation_id };
-
-    const total = await Message.countDocuments(filter);
-
-    const messages = await Message.find(filter)
-      .skip(skip)
-      .limit(limit)
-      .populate('conversationid', 'topicid') 
-      .populate('userid', 'firstname lastname') 
-      .sort({ createdAt: 1 }); 
-
-    const totalPages = Math.ceil(total / limit);
-
-    return {
-      data: messages,
-      pagination: {
-        totalItems: total,
-        totalPages,
-        currentPage: page,
-        limit,
-      },
-    };
-  };
+};
 
 // eslint-disable-next-line camelcase
 const deleteConversation = async (conversation_id) => {
@@ -103,11 +98,11 @@ const deleteConversation = async (conversation_id) => {
 };
 
 module.exports = {
-    createConversation,
-    listConversationsByUser,
-    createMessage,
-    getconversationById,
-    getConversationByTopicAndUser,
-    getAllMessages,
-    deleteConversation,
+  createConversation,
+  listConversationsByUser,
+  createMessage,
+  getconversationById,
+  getConversationByTopicAndUser,
+  getAllMessages,
+  deleteConversation,
 };

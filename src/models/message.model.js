@@ -2,31 +2,41 @@ const mongoose = require('mongoose');
 const { toJSON } = require('./plugins');
 
 const messageSchema = mongoose.Schema(
-    {
-        message: {
-            type: String,  
-        },
-        message_type: {
-            type: String,  
-        },
-        conversationid: {
-            type: mongoose.SchemaTypes.ObjectId,
-            ref: 'Conversation',
-            required: true,
-        },
-        userid: {
-            type: mongoose.SchemaTypes.ObjectId,
-            ref: 'User',
-            required: true,
-        },
-        role: {
-            type: String,
-            default: "user"
-        }
+  {
+    conversationid: {
+      type: mongoose.Types.ObjectId,
+      ref: 'Conversation',
+      required: true,
     },
-    {
-        timestamps: true,
-    }
+    userid: {
+      type: mongoose.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    role: {
+      type: String,
+      default: '',
+    },
+    content: {
+      type: String,
+      default: '',
+    },
+    summary: {
+      type: String,
+      default: '',
+    },
+    title: {
+      type: String,
+      default: '',
+    },
+    type: {
+      type: String,
+      default: '',
+    },
+  },
+  {
+    timestamps: true,
+  }
 );
 
 // add plugin that converts mongoose to json
