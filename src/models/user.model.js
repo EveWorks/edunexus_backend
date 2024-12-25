@@ -9,7 +9,7 @@ const userSchema = mongoose.Schema(
     firstname: {
       type: String,
       required: true,
-      trim: true,   
+      trim: true,
     },
     lastname: {
       type: String,
@@ -71,6 +71,10 @@ const userSchema = mongoose.Schema(
         }
       },
       private: true, // used by the toJSON plugin
+    },
+    dailyTokenLimit: {
+      type: Number,
+      default: 330000,
     },
     isEmailVerified: {
       type: Boolean,

@@ -31,6 +31,15 @@ const sendmessage = catchAsync(async (req, res) => {
     .sort({ _id: -1 })
     .lean();
   conversationMessages = conversationMessages.reverse();
+  if (!userData?.dailyTokenLimit || userData?.dailyTokenLimit < 0) {
+    return res
+      .status(400)
+      .json({
+        status: false,
+        message: 'Daily token limit is exceeded, try again tomorrow.',
+      })
+      .end();
+  }
 
   let aiResponse = await callAIService(userData, conversationMessages, message, interests);
   if (aiResponse?.messageObject) {
@@ -49,6 +58,12 @@ const sendmessage = catchAsync(async (req, res) => {
       type: aiResponse?.messageObject?.type,
       conversationid: conversation?._id,
       userid,
+    });
+    const totalTokens = aiResponse.messageObject.total_tokens || 0;
+    await User.findByIdAndUpdate(userid, {
+      $inc: {
+        dailyTokenLimit: -totalTokens,
+      },
     });
   }
   // if (aiResponse.messagesArray.length) {
@@ -189,7 +204,7 @@ const updatePersonalization = catchAsync(async (req, res) => {
         ? personalization?.wants_to_learn
         : ['Computer Science', 'Mathematics'],
       previous_progress: personalization?.previous_progress?.length ? personalization?.previous_progress : {},
-      messages: conversationMessage.map((e) => e.message).length > 0 ? conversationMessage.map((e) => e.message) : [],
+      messages: conversationMessage.map((e) => e.content).length > 0 ? conversationMessage.map((e) => e.content) : [],
     });
     let config = {
       method: 'POST',
