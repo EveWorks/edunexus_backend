@@ -59,6 +59,15 @@ const sendmessage = catchAsync(async (req, res) => {
       conversationid: conversation?._id,
       userid,
     });
+    await Conversation.findByIdAndUpdate(
+      conversation?._id,
+      {
+        $set: {
+          conversation_title: aiResponse?.messageObject?.title,
+        },
+      },
+      { new: true }
+    );
     const totalTokens = aiResponse.messageObject.total_tokens || 0;
     await User.findByIdAndUpdate(userid, {
       $inc: {

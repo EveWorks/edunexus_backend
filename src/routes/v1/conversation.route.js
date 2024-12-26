@@ -20,4 +20,6 @@ router.delete('/remove_conversation/:id', auth(), conversationController.removeC
 
 router.post('/update-personalization', auth(), conversationController.updatePersonalization);
 
+router.post('/track-close', conversationController.updatePersonalization);
+
 module.exports = router;
