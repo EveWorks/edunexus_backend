@@ -6,13 +6,13 @@ const catchAsync = require('../utils/catchAsync');
 const { userService } = require('../services');
 const tokenService = require('../services/token.service');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const SubscriptionPlans = require('../models/subscriptionPlans.model')
+const SubscriptionPlans = require('../models/subscriptionPlans.model');
 
 const createUser = catchAsync(async (req, res) => {
-
   // const { device_id, device_type, device_token, ...userData } = req.body;
   const user = await userService.createUser(req.body);
   // const tokens = await tokenService.generateAuthTokens(user, device_id, device_type, device_token);
+
   const customer = await stripe.customers.create({
     email: user.email,
     metadata: {
@@ -20,8 +20,8 @@ const createUser = catchAsync(async (req, res) => {
     },
   });
   const price = await stripe.prices.list({
-    limit: 1
-  })
+    limit: 1,
+  });
   const subscription = await stripe.subscriptions.create({
     customer: customer.id,
     items: [{ price: price?.data[0]?.id }],
@@ -33,17 +33,16 @@ const createUser = catchAsync(async (req, res) => {
     stripeCustomerId: customer?.id,
     subscriptionId: subscription?.id,
     subscriptionStatus: subscription?.status,
-    trialEndsAt: new Date(subscription.trial_end * 1000)
-  })
+    trialEndsAt: new Date(subscription.trial_end * 1000),
+  });
   res.status(httpStatus.CREATED).send({
     user,
-    subscription: userSubscription
+    subscription: userSubscription,
     // tokens,
   });
 });
 
-
-const loginUser= catchAsync(async(req,res) =>{
+const loginUser = catchAsync(async (req, res) => {
   const { email, password, device_id, device_type, device_token } = req.body;
 
   const user = await userService.getUserByEmail(email);
@@ -56,22 +55,17 @@ const loginUser= catchAsync(async(req,res) =>{
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect password');
   }
 
-  const jwtToken = await tokenService.checkToken(
-    { device_id, device_type, device_token },
-    user._id
-  );
+  const jwtToken = await tokenService.checkToken({ device_id, device_type, device_token }, user._id);
   // const tokens = await tokenService.generateAuthTokens(user, device_id, device_type, device_token);
 
   res.status(httpStatus.OK).send({
     user,
-    tokens:jwtToken,
+    tokens: jwtToken,
   });
-})
+});
 
-
-const getuserprofile = catchAsync (async(req,res)=>{
-
-  const {id} = req.user;
+const getuserprofile = catchAsync(async (req, res) => {
+  const { id } = req.user;
 
   const user = await userService.getUserById(id);
   if (!user) {
@@ -79,12 +73,9 @@ const getuserprofile = catchAsync (async(req,res)=>{
   }
   res.status(httpStatus.OK).send({
     id,
-    user
+    user,
   });
-
-})
-
-
+});
 
 const getUsers = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['name', 'role']);
@@ -92,9 +83,6 @@ const getUsers = catchAsync(async (req, res) => {
   const result = await userService.queryUsers(filter, options);
   res.send(result);
 });
-
-
-
 
 const getUser = catchAsync(async (req, res) => {
   const user = await userService.getUserById(req.params.userId);
@@ -121,5 +109,5 @@ module.exports = {
   updateUser,
   deleteUser,
   loginUser,
-  getuserprofile
+  getuserprofile,
 };

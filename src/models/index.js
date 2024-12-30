@@ -4,3 +4,4 @@ module.exports.Topic = require('./topic.model');
 module.exports.Conversation = require('./conversation.model');
 module.exports.Message = require('./message.model');
 module.exports.Personalization = require('./personalisation.models');
+module.exports.SubscriptionPlans = require('./subscriptionPlans.model');
