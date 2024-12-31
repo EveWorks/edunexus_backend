@@ -1,5 +1,6 @@
 const httpStatus = require('http-status');
 const { User } = require('../models');
+const { SubscriptionPlans } = require('../models');
 const ApiError = require('../utils/ApiError');
 
 /**
@@ -35,6 +36,15 @@ const queryUsers = async (filter, options) => {
  */
 const getUserById = async (id) => {
   return User.findById(id);
+};
+
+/**
+ * Get Subscription by id
+ * @param {ObjectId} id
+ * @returns {Promise<SubscriptionPlans>}
+ */
+const getSubscriptionById = async (id) => {
+  return SubscriptionPlans.findOne({ userId: id });
 };
 
 /**
@@ -83,6 +93,7 @@ module.exports = {
   createUser,
   queryUsers,
   getUserById,
+  getSubscriptionById,
   getUserByEmail,
   updateUserById,
   deleteUserById,
