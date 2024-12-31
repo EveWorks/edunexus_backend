@@ -19,7 +19,7 @@ const userSchema = mongoose.Schema(
     age: {
       type: Number,
       required: true,
-      min: 18, // Minimum age limit (example)
+      min: 16, // Minimum age limit (example)
     },
     gender: {
       type: String,
@@ -79,6 +79,10 @@ const userSchema = mongoose.Schema(
     isEmailVerified: {
       type: Boolean,
       default: false,
+    },
+    verificationCode: {
+      type: Number,
+      default: null,
     },
   },
   {
