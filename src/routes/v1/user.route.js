@@ -13,13 +13,15 @@ router
 
 router.route('/login').post(validate(userValidation.login), userController.loginUser);
 
-router.route('/get_profile').get(auth(),userController.getuserprofile);
+router.route('/get_profile').get(auth(), userController.getuserprofile);
 
 router
   .route('/:userId')
   .get(auth('getUsers'), validate(userValidation.getUser), userController.getUser)
   .patch(auth('manageUsers'), validate(userValidation.updateUser), userController.updateUser)
   .delete(auth('manageUsers'), validate(userValidation.deleteUser), userController.deleteUser);
+
+router.post('/verify-otp', validate(userValidation.verifyOTP), userController.verifyOTP);
 
 module.exports = router;
 

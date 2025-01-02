@@ -106,10 +106,10 @@ const generateResetPasswordToken = async (email) => {
   }
   const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, 'minutes');
   const resetPasswordToken = generateToken(user.id, expires, tokenTypes.RESET_PASSWORD);
-  
+
   // Save the reset password token with the user's details (no device information needed here)
   await saveToken(user.id, null, null, resetPasswordToken, expires, tokenTypes.RESET_PASSWORD);
-  
+
   return resetPasswordToken;
 };
 
@@ -121,14 +121,12 @@ const generateResetPasswordToken = async (email) => {
 const generateVerifyEmailToken = async (user) => {
   const expires = moment().add(config.jwt.verifyEmailExpirationMinutes, 'minutes');
   const verifyEmailToken = generateToken(user.id, expires, tokenTypes.VERIFY_EMAIL);
-  
+
   // Save the verify email token with the user's details (no device information needed here)
   await saveToken(user.id, null, null, verifyEmailToken, expires, tokenTypes.VERIFY_EMAIL);
-  
+
   return verifyEmailToken;
 };
-
-
 
 /**
  * Check if the token already exists and generate a new one if necessary
@@ -138,20 +136,19 @@ const generateVerifyEmailToken = async (user) => {
  */
 const checkToken = async (data, user_id) => {
   const tokenData = {
-    user: user_id,  
+    user: user_id,
     device_id: data.device_id,
     device_token: data.device_token,
-    device_type: data.device_type
+    device_type: data.device_type,
   };
 
-  let token = await Token.findOne(tokenData);
+  const token = await Token.findOne(tokenData);
 
   if (token) {
-    await token.remove(); 
+    await token.remove();
   }
 
-
-  const expires = moment().add(8760, 'hour'); 
+  const expires = moment().add(8760, 'hour');
   const newToken = await Token.create({
     ...tokenData,
     expires: expires.toDate(),
@@ -168,5 +165,5 @@ module.exports = {
   generateAuthTokens,
   generateResetPasswordToken,
   generateVerifyEmailToken,
-  checkToken
+  checkToken,
 };
