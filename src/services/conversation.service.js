@@ -75,7 +75,7 @@ const getAllMessages = async (conversation_id, options) => {
     .limit(limit)
     .populate('conversationid', 'topicid')
     .populate('userid', 'firstname lastname')
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: 1 });
 
   const totalPages = Math.ceil(total / limit);
 
