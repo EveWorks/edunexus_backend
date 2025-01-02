@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const httpStatus = require('http-status');
+const moment = require('moment');
 const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
@@ -7,6 +8,8 @@ const { userService, emailService } = require('../services');
 const tokenService = require('../services/token.service');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const SubscriptionPlans = require('../models/subscriptionPlans.model');
+const config = require('../config/config');
+const { tokenTypes } = require('../config/tokens');
 
 // write a function to generate a random otp of 6 digits
 const getOTP = () => {
@@ -117,6 +120,17 @@ const deleteUser = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const verifyOTP = catchAsync(async (req, res) => {
+  const verifiedUser = await userService.verifyOTP(req.body);
+  const accessTokenExpires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
+
+  const token = await tokenService.generateToken(verifiedUser.id, accessTokenExpires, tokenTypes.ACCESS);
+  await userService.updateUserById(verifiedUser.id, { verificationCode: null });
+  const subscription = await userService.getSubscriptionById(verifiedUser.id);
+
+  res.status(httpStatus.OK).send({ user: verifiedUser, token, subscription });
+});
+
 module.exports = {
   createUser,
   getUsers,
@@ -125,4 +139,5 @@ module.exports = {
   deleteUser,
   loginUser,
   getuserprofile,
+  verifyOTP,
 };

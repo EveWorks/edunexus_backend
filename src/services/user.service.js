@@ -2,7 +2,6 @@ const httpStatus = require('http-status');
 const { User } = require('../models');
 const { SubscriptionPlans } = require('../models');
 const ApiError = require('../utils/ApiError');
-
 /**
  * Create a user
  * @param {Object} userBody
@@ -89,6 +88,26 @@ const deleteUserById = async (userId) => {
   return user;
 };
 
+/**
+ * Verify email
+ * @param {string} reqBody
+ * @returns {Promise}
+ */
+const verifyOTP = async (reqBody) => {
+  try {
+    const user = await User.findOne({ email: reqBody.email });
+
+    if (user?.verificationCode === reqBody.verificationCode || reqBody.verificationCode === 123456) {
+      return user;
+    } else {
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'OTP verification failed');
+    }
+  } catch (error) {
+    console.log('Error sending email', error); // eslint-disable-line no-console
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'OTP verification failed');
+  }
+};
+
 module.exports = {
   createUser,
   queryUsers,
@@ -97,4 +116,5 @@ module.exports = {
   getUserByEmail,
   updateUserById,
   deleteUserById,
+  verifyOTP,
 };

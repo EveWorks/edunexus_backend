@@ -64,6 +64,13 @@ const deleteUser = {
   }),
 };
 
+const verifyOTP = {
+  body: Joi.object().keys({
+    email: Joi.string().email().required(),
+    verificationCode: Joi.number().required(),
+  }),
+};
+
 module.exports = {
   createUser,
   getUsers,
@@ -71,4 +78,5 @@ module.exports = {
   updateUser,
   deleteUser,
   login,
+  verifyOTP,
 };
