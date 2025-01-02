@@ -1,4 +1,10 @@
 const express = require('express');
+const aws = require('aws-sdk');
+aws.config.update({
+  region: 'us-east-1',
+  credentials: { accessKeyId: process.env.AWS_SES_USERNAME, secretAccessKey: process.env.AWS_SES_SMTP_PASSWORD },
+  apiVersion: '2010-12-01',
+});
 const helmet = require('helmet');
 const xss = require('xss-clean');
 const mongoSanitize = require('express-mongo-sanitize');

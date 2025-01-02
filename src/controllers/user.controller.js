@@ -3,13 +3,20 @@ const httpStatus = require('http-status');
 const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
-const { userService } = require('../services');
+const { userService, emailService } = require('../services');
 const tokenService = require('../services/token.service');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const SubscriptionPlans = require('../models/subscriptionPlans.model');
 
+// write a function to generate a random otp of 6 digits
+const getOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000);
+};
+
 const createUser = catchAsync(async (req, res) => {
   // const { device_id, device_type, device_token, ...userData } = req.body;
+  req.body.verificationCode = getOTP();
+  req.body.isEmailVerified = false;
   const user = await userService.createUser(req.body);
   // const tokens = await tokenService.generateAuthTokens(user, device_id, device_type, device_token);
 
@@ -35,6 +42,14 @@ const createUser = catchAsync(async (req, res) => {
     subscriptionStatus: subscription?.status,
     trialEndsAt: new Date(subscription.trial_end * 1000),
   });
+  try {
+    await emailService.sendVerificationEmail(user.email, user.verificationCode);
+  } catch (error) {
+    console.log('Error sending email', error);
+  }
+  if (user.verificationCode) {
+    delete user.verificationCode;
+  }
   res.status(httpStatus.CREATED).send({
     user,
     subscription: userSubscription,

@@ -59,6 +59,6 @@ module.exports = {
         pass: envVars.SMTP_PASSWORD,
       },
     },
-    from: envVars.EMAIL_FROM,
+    from: 'admin@alinda.ai',
   },
 };

@@ -28,7 +28,7 @@ const sendmessage = catchAsync(async (req, res) => {
   })
     .select({ role: 1, content: 1, _id: 0, summary: 1, title: 1, type: 1 })
     .limit(15)
-    .sort({ _id: -1 })
+    .sort({ _id: 1 })
     .lean();
   conversationMessages = conversationMessages.reverse();
   if (!userData?.dailyTokenLimit || userData?.dailyTokenLimit < 0) {
