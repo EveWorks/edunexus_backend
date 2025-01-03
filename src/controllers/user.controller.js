@@ -23,28 +23,28 @@ const createUser = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
   // const tokens = await tokenService.generateAuthTokens(user, device_id, device_type, device_token);
 
-  const customer = await stripe.customers.create({
-    email: user.email,
-    metadata: {
-      userId: user._id.toString(),
-    },
-  });
-  const price = await stripe.prices.list({
-    limit: 1,
-  });
-  const subscription = await stripe.subscriptions.create({
-    customer: customer.id,
-    items: [{ price: price?.data[0]?.id }],
-    trial_period_days: 7,
-    payment_behavior: 'default_incomplete',
-  });
-  const userSubscription = await SubscriptionPlans.create({
-    userId: user?._id,
-    stripeCustomerId: customer?.id,
-    subscriptionId: subscription?.id,
-    subscriptionStatus: subscription?.status,
-    trialEndsAt: new Date(subscription.trial_end * 1000),
-  });
+  // const customer = await stripe.customers.create({
+  //   email: user.email,
+  //   metadata: {
+  //     userId: user._id.toString(),
+  //   },
+  // });
+  // const price = await stripe.prices.list({
+  //   limit: 1,
+  // });
+  // const subscription = await stripe.subscriptions.create({
+  //   customer: customer.id,
+  //   items: [{ price: price?.data[0]?.id }],
+  //   trial_period_days: 7,
+  //   payment_behavior: 'default_incomplete',
+  // });
+  // const userSubscription = await SubscriptionPlans.create({
+  //   userId: user?._id,
+  //   stripeCustomerId: customer?.id,
+  //   subscriptionId: subscription?.id,
+  //   subscriptionStatus: subscription?.status,
+  //   trialEndsAt: new Date(subscription.trial_end * 1000),
+  // });
   try {
     await emailService.sendVerificationEmail(user.email, user.verificationCode);
   } catch (error) {
@@ -55,7 +55,7 @@ const createUser = catchAsync(async (req, res) => {
   }
   res.status(httpStatus.CREATED).send({
     user,
-    subscription: userSubscription,
+    // subscription: userSubscription,
     // tokens,
   });
 });
@@ -131,6 +131,16 @@ const verifyOTP = catchAsync(async (req, res) => {
   res.status(httpStatus.OK).send({ user: verifiedUser, token, subscription });
 });
 
+const addSubscriptionPlan = catchAsync(async (req, res) => {
+  const { userId, subscriptionType, stripeSessionId } = req.body;
+  const userSubscription = await SubscriptionPlans.create({
+    userId,
+    subscriptionType,
+    stripeSessionId,
+  });
+  res.status(httpStatus.CREATED).send(userSubscription);
+});
+
 module.exports = {
   createUser,
   getUsers,
@@ -140,4 +150,5 @@ module.exports = {
   loginUser,
   getuserprofile,
   verifyOTP,
+  addSubscriptionPlan,
 };

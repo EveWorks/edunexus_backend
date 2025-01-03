@@ -22,6 +22,7 @@ router
   .delete(auth('manageUsers'), validate(userValidation.deleteUser), userController.deleteUser);
 
 router.post('/verify-otp', validate(userValidation.verifyOTP), userController.verifyOTP);
+router.post('/subscribe-plan', validate(userValidation.addSubscriptionPlan), userController.addSubscriptionPlan);
 
 module.exports = router;
 
