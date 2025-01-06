@@ -75,10 +75,12 @@ const loginUser = catchAsync(async (req, res) => {
 
   const jwtToken = await tokenService.checkToken({ device_id, device_type, device_token }, user._id);
   // const tokens = await tokenService.generateAuthTokens(user, device_id, device_type, device_token);
+  const subscription = await userService.getSubscriptionById(user.id);
 
   res.status(httpStatus.OK).send({
     user,
     tokens: jwtToken,
+    subscription
   });
 });
 
