@@ -138,9 +138,9 @@ const addSubscriptionPlan = catchAsync(async (req, res) => {
     userId,
     stripeCustomerId,
     subscriptionId,
-    startDate: subscription.created,
-    renewDate: subscription.current_period_end,
-    trialEnd: subscription.trial_end,
+    startDate: moment.unix(subscription.created).toISOString(),
+    renewDate: moment.unix(subscription.current_period_end).toISOString(),
+    trialEnd: moment.unix(subscription.trial_end).toISOString(),
     subscriptionType,
     stripeSessionId,
   });
