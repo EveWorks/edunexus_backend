@@ -7,23 +7,21 @@ const subscriptionPlans = mongoose.Schema(
       type: mongoose.Types.ObjectId,
       ref: 'users',
     },
-    // stripeCustomerId: {
-    //   type: String,
-    // },
-    // subscriptionId: {
-    //   type: String,
-    // },
-    // subscriptionStatus: {
-    //   type: String,
-    //   enum: ['trialing', 'active', 'canceled', 'expired'],
-    //   default: 'trialing',
-    // },
-    // trialEndsAt: {
-    //   type: Date,
-    // },
-    // planName: {
-    //   type: String,
-    // },
+    stripeCustomerId: {
+      type: String,
+    },
+    subscriptionId: {
+      type: String,
+    },
+    startDate: {
+      type: Date,
+    },
+    renewDate: {
+      type: Date,
+    },
+    trialEnd: {
+      type: Date,
+    },
     subscriptionType: {
       type: String,
       enum: ['FREE', 'PAID'],

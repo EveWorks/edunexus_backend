@@ -125,20 +125,26 @@ const verifyOTP = catchAsync(async (req, res) => {
   const accessTokenExpires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
 
   const token = await tokenService.generateToken(verifiedUser.id, accessTokenExpires, tokenTypes.ACCESS);
-  await userService.updateUserById(verifiedUser.id, { verificationCode: null });
+  await userService.updateUserById(verifiedUser.id, { verificationCode: null, isEmailVerified: true });
   const subscription = await userService.getSubscriptionById(verifiedUser.id);
 
   res.status(httpStatus.OK).send({ user: verifiedUser, token, subscription });
 });
 
 const addSubscriptionPlan = catchAsync(async (req, res) => {
-  const { userId, subscriptionType, stripeSessionId } = req.body;
+  const { userId, stripeCustomerId, subscriptionId, stripeSessionId } = req.body;
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
   const userSubscription = await SubscriptionPlans.create({
     userId,
-    subscriptionType,
+    stripeCustomerId,
+    subscriptionId,
+    startDate: subscription.created,
+    renewDate: subscription.current_period_end,
+    trialEnd: subscription.trial_end,
+    subscriptionType: 'PAID',
     stripeSessionId,
   });
-  res.status(httpStatus.CREATED).send(userSubscription);
+  res.status(httpStatus.CREATED).send({ data: userSubscription });
 });
 
 module.exports = {

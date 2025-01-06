@@ -72,11 +72,13 @@ const verifyOTP = {
 };
 
 const addSubscriptionPlan = {
-  body: Joi.object().keys({
-    userId: Joi.string(),
-    subscriptionType: Joi.string().required(),
-    stripeSessionId: Joi.string(),
-  }),
+  body: Joi.object()
+    .keys({
+      userId: Joi.string(),
+      subscriptionType: Joi.string().required(),
+      stripeSessionId: Joi.string(),
+    })
+    .unknown(),
 };
 
 module.exports = {
