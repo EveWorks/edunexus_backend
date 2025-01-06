@@ -97,7 +97,7 @@ const verifyOTP = async (reqBody) => {
   try {
     const user = await User.findOne({ email: reqBody.email });
 
-    if (user?.verificationCode === reqBody.verificationCode || reqBody.verificationCode === 123456) {
+    if (user?.verificationCode == reqBody.verificationCode || reqBody.verificationCode == process.env.MASTER_OTP) {
       return user;
     } else {
       throw new ApiError(httpStatus.UNAUTHORIZED, 'OTP verification failed');
