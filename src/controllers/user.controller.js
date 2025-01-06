@@ -132,7 +132,7 @@ const verifyOTP = catchAsync(async (req, res) => {
 });
 
 const addSubscriptionPlan = catchAsync(async (req, res) => {
-  const { userId, stripeCustomerId, subscriptionId, stripeSessionId } = req.body;
+  const { userId, stripeCustomerId, subscriptionId, stripeSessionId, subscriptionType } = req.body;
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
   const userSubscription = await SubscriptionPlans.create({
     userId,
@@ -141,7 +141,7 @@ const addSubscriptionPlan = catchAsync(async (req, res) => {
     startDate: subscription.created,
     renewDate: subscription.current_period_end,
     trialEnd: subscription.trial_end,
-    subscriptionType: 'PAID',
+    subscriptionType,
     stripeSessionId,
   });
   res.status(httpStatus.CREATED).send({ data: userSubscription });
