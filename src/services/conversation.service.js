@@ -41,7 +41,7 @@ const createMessage = async (messageBody) => {
 const listConversationsByUser = async (userid) => {
   return Conversation.find({ userid })
     .populate('topicid', 'topic_name') // Populate topic_name from the Topic model
-    .sort({ createdAt: -1 }); // Sort by most recent conversation
+    .sort({ updatedAt: -1 }); // Sort by most recent conversation
 };
 
 /**
